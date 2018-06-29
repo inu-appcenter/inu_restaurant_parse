@@ -1,45 +1,29 @@
 /* copyright(c) 2016 All rights reserved by seon-il kim(supercartoon@naver.com) 201101720 정보통신공학과 김선일
 * 수정하지 마세요!
 */
-
 var mysql = require('mysql');
 var cheerio = require('cheerio');
 var request = require('request');
-var async = require('async');
 var schedule = require('node-schedule');
-var rule = new schedule.RecurrenceRule();
-// rule.hour = 17;
-// rule.minute = 19;
-rule.dayOfWeek = [0, new schedule.Range(0, 1)];
-rule.hour = 0;
-rule.minute = 1;
 
 console.log("<<< INU 생협 식단 파싱 node.js / by Seon-Il Kim (supercartoon@naver.com) >>>");
 console.log("이 작업은 매주 일요일, 월요일 0시 1분에 실행됩니다.");
-var j = schedule.scheduleJob(rule, function(){
+var j = schedule.scheduleJob("1 0 * * 0,1" , function(){
   console.log(new Date());
   insertDB();
 });
 
-// var j = schedule.scheduleJob({hour: 0, minute: 1, dayOfWeek: 0, 1}, function(){
-//   console.log(new Date());
-//   insertDB();
-// });
-
 var url = 'https://www.uicoop.ac.kr:41052/shop/shop.php?w=3';
 
-var pool = mysql.createPool({
-    host: 'localhost',
-    port: ,
-    user: '',
-    password: '',
-    database: ''
-});
+var pool = mysql.createPool(
+  require('./config.js').db
+);
 
 function convertHTML(menu) {
     menu = menu.replace(/(^\s*)|(\s*$)/g, "");
     menu = menu.replace(/<\/td>/gi, '');
     menu = menu.replace(/<td class="menu-list" valign="top">/gi, '');
+    menu = menu.replace(/<td class="menu-list-corn">/gi, '');
     menu = menu.replace(/&nbsp;/gi, '');
     menu = menu.replace(/<\/span>/gi, '');
     menu = menu.replace(/<span style="font-weight:bold;color:#0B555B;font-size:1.1em;">/gi, '');
